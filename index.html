@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>SSWU 스마트 제어 시스템</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+</head>
+<body style="text-align:center; background:#f3f0ff; padding-top:50px; font-family: 'Apple SD Gothic Neo', sans-serif;">
+
+    <h2 style="color:#6200ea;">💜 SSWU 동작 인식 제어 💜</h2>
+    <p style="color:#666;">정해진 동작을 하면 해당 사이트가 새 탭으로 열립니다.</p>
+    
+    <button onclick="start()" id="start-btn" style="padding:15px 30px; font-size:18px; cursor:pointer; background:#6200ea; color:white; border:none; border-radius:10px; font-weight:bold;">시스템 시작하기</button>
+    
+    <div id="webcam-container" style="margin-top:20px; border:5px solid #6200ea; display:inline-block; border-radius:20px; overflow:hidden; background:white;"></div>
+    
+    <div id="label-container" style="font-size:24px; font-weight:bold; margin-top:20px; color:#6200ea;">인식 대기 중...</div>
+
+    <script>
+        const URL = "https://teachablemachine.withgoogle.com/models/oTlDr5AGU/";
+        
+        // 🔗 수민 님의 클래스 이름과 사이트 주소를 매칭하세요!
+        // (주의: 티쳐블 머신의 클래스 이름과 토씨 하나 안 틀리고 똑같아야 합니다.)
+        const SITES = {
+            "포탈": "https://portal.sungshin.ac.kr/sso/login.jsp",
+            "LMS": "https://slms.sungshin.ac.kr/",
+            "도서관": "https://lib.sungshin.ac.kr/",
+            "홈피": "https://www.sungshin.ac.kr/sites/main_kor/main.jsp"
+        };
+
+        let model, webcam, labelContainer, maxPredictions;
+        let lastActionTime = 0; // 마지막으로 창을 연 시간 저장
+
+        async function start() {
+            try {
+                document.getElementById('start-btn').style.display = "none";
+                document.getElementById('label-container').innerHTML = "모델 로딩 중...";
+                
+                model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+                maxPredictions = model.getTotalClasses();
+
+                webcam = new tmImage.Webcam(400, 400, true); 
+                await webcam.setup();
+                await webcam.play();
+                
+                document.getElementById("webcam-container").innerHTML = "";
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                
+                window.requestAnimationFrame(loop);
+            } catch (e) {
+                alert("에러 발생: " + e.message);
+                document.getElementById('start-btn').style.display = "inline-block";
+            }
+        }
+
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            
+            for (let i = 0; i < maxPredictions; i++) {
+                const prob = prediction[i].probability.toFixed(2);
+                const label = prediction[i].className;
+
+                // 95% 이상 일치할 때만 작동
+                if (prob > 0.95) {
+                    document.getElementById("label-container").innerHTML = "인식됨: " + label;
+                    openSite(label);
+                }
+            }
+        }
+
+        function openSite(label) {
+            const now = Date.now();
+            
+            // 1. 등록된 사이트인지 확인
+            // 2. 마지막으로 연 지 5초(5000ms)가 지났는지 확인 (중복 방지)
+            if (SITES[label] && (now - lastActionTime > 5000)) {
+                console.log(label + " 사이트를 엽니다.");
+                window.open(SITES[label], '_blank');
+                lastActionTime = now; // 시간 업데이트
+            }
+        }
+    </script>
+</body>
+</html>
