@@ -2,6 +2,10 @@
 
 웹캠으로 동작(제스처)을 인식해서 정해진 사이트를 새 탭으로 열어주는 브라우저 기반 도구입니다. Google의 Teachable Machine으로 학습한 이미지 분류 모델과 TensorFlow.js를 사용합니다.
 
+## 데모
+
+[데모 영상 보기](https://drive.google.com/file/d/1MbhxkCxRtlWEpIQS9_mOURxL9ogOnunT/view?usp=sharing)
+
 ## 개요
 
 이 프로젝트는 특정 동작(예: 손 흔들기, 특정 포즈 등)을 웹캠으로 인식하여, 미리 지정한 사이트(학교 포털, LMS, 도서관 등)를 자동으로 열어주는 개인용 단축키 도구입니다. 별도의 설치 없이 브라우저에서 바로 실행할 수 있습니다.
@@ -15,29 +19,39 @@
 
 ## 사용 기술
 
-- [TensorFlow.js](https://www.tensorflow.org/js) — 브라우저에서 머신러닝 모델 실행
-- [Teachable Machine](https://teachablemachine.withgoogle.com/) — 이미지 분류 모델 학습
+| 기술 | 역할 |
+|---|---|
+| [TensorFlow.js](https://www.tensorflow.org/js) | 브라우저에서 머신러닝 모델 실행 |
+| [Teachable Machine](https://teachablemachine.withgoogle.com/) | 이미지 분류 모델 학습 |
 
 ## 사용 방법
 
-1. [Teachable Machine](https://teachablemachine.withgoogle.com/train/image)에서 원하는 동작(클래스)을 학습시키고 모델을 게시(Export)합니다.
-2. `index.html` 파일의 `URL` 변수를 본인의 모델 주소로 교체합니다.
+### 1. 모델 학습하기
 
-   ```javascript
-   const URL = "본인의_모델_주소";
-   ```
+[Teachable Machine](https://teachablemachine.withgoogle.com/train/image)에서 원하는 동작(클래스)을 학습시키고 모델을 게시(Export)하여 모델 주소를 얻습니다.
 
-3. `SITES` 객체에 클래스 이름과 열고 싶은 사이트 주소를 매칭합니다. 클래스 이름은 Teachable Machine에서 설정한 이름과 정확히 일치해야 합니다.
+### 2. 모델 주소 설정하기
 
-   ```javascript
-   const SITES = {
-       "클래스이름1": "https://example.com/",
-       "클래스이름2": "https://example2.com/"
-   };
-   ```
+`index.html` 파일의 `URL` 변수를 본인의 모델 주소로 교체합니다.
 
-4. `index.html` 파일을 브라우저에서 열고 "시스템 시작하기" 버튼을 누릅니다.
-5. 웹캠 접근 권한을 허용하면 사용할 수 있습니다.
+\`\`\`javascript
+const URL = "본인의_모델_주소";
+\`\`\`
+
+### 3. 동작과 사이트 매칭하기
+
+`SITES` 객체에 클래스 이름과 열고 싶은 사이트 주소를 매칭합니다. 클래스 이름은 Teachable Machine에서 설정한 이름과 정확히 일치해야 합니다.
+
+\`\`\`javascript
+const SITES = {
+    "클래스이름1": "https://example.com/",
+    "클래스이름2": "https://example2.com/"
+};
+\`\`\`
+
+### 4. 실행하기
+
+`index.html` 파일을 브라우저에서 열고 "시스템 시작하기" 버튼을 누른 뒤, 웹캠 접근 권한을 허용하면 사용할 수 있습니다.
 
 ## 커스터마이징
 
